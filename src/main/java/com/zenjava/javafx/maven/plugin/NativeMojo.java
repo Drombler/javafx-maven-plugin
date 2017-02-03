@@ -403,9 +403,27 @@ public class NativeMojo extends AbstractJfxToolsMojo {
     protected boolean skipJNLP = false;
 
     /**
-     * @parameter default-value=false
+     * @parameter property="skipNativeVersionNumberSanitizing" default-value=false
      */
     protected boolean skipNativeVersionNumberSanitizing = false;
+
+    /**
+     * Since it it possible to sign created jar-files using jarsigner, it might be required to
+     * add some special parameters for calling it (like -tsa and -tsacert). Just add them to this
+     * list to have them being applied.
+     *
+     * @parameter
+     */
+    protected List<String> additionalJarsignerParameters = new ArrayList<>();
+
+    /**
+     * Set this to true, to not scan for the specified main class inside the generated/copied jar-files.
+     *
+     * Check only works for the main launcher, any secondary launchers are not checked.
+     *
+     * @parameter
+     */
+    protected boolean skipMainClassScanning = false;
 
     protected Workarounds workarounds = null;
 
@@ -500,6 +518,14 @@ public class NativeMojo extends AbstractJfxToolsMojo {
 
             if( !duplicateKeys.isEmpty() ){
                 throw new MojoExecutionException("The following keys in <bundleArguments> duplicate other settings, please remove one or the other: " + duplicateKeys.toString());
+            }
+
+            if( !skipMainClassScanning ){
+                boolean mainClassInsideResourceJarFile = resourceFiles.stream().filter(resourceFile -> resourceFile.toString().endsWith(".jar")).filter(resourceJarFile -> isClassInsideJarFile(mainClass, resourceJarFile)).findFirst().isPresent();
+                if( !mainClassInsideResourceJarFile ){
+                    // warn user about missing class-file
+                    getLog().warn(String.format("Class with name %s was not found inside provided jar files!! JavaFX-application might not be working !!", mainClass));
+                }
             }
 
             // check for secondary launcher misconfiguration (their appName requires to be different as this would overwrite primary launcher)
@@ -998,6 +1024,10 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         command.add(keyPassword);
         command.add(jarFile.getAbsolutePath());
         command.add(keyStoreAlias);
+        Optional.ofNullable(additionalJarsignerParameters).ifPresent(jarsignerParameters -> {
+            command.addAll(jarsignerParameters);
+        });
+
         if( verbose ){
             command.add("-verbose");
         }
@@ -1008,6 +1038,10 @@ public class NativeMojo extends AbstractJfxToolsMojo {
                     .directory(project.getBasedir())
                     .command(command);
 
+            if( verbose ){
+                getLog().info("Running command: " + String.join(" ", command));
+            }
+
             getLog().info("Signing JAR files for jnlp bundle using jarsigner-method");
             Process p = pb.start();
             p.waitFor();
@@ -1017,14 +1051,6 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         } catch(IOException | InterruptedException ex){
             throw new MojoExecutionException("There was an exception while signing jar-file: " + jarFile.getAbsolutePath(), ex);
         }
-    }
-
-    private boolean isClassInsideJarFile(String classname, String jarFile) {
-        return isClassInsideJarFile(classname, new File(jarFile));
-    }
-
-    private boolean isClassInsideJarFile(String classname, Path jarFile) {
-        return isClassInsideJarFile(classname, jarFile.toFile());
     }
 
     private boolean isClassInsideJarFile(String classname, File jarFile) {
