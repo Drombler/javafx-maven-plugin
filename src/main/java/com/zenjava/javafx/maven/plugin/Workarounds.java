@@ -82,16 +82,16 @@ public class Workarounds {
         return (JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(40)) || JavaDetectionTools.IS_JAVA_9;
     }
 
-    protected void applyNativeLauncherWorkaround(String appName) {
+    protected void applyNativeLauncherWorkaround(String appFsName) {
         // check appName containing any dots
-        boolean needsWorkaround = appName.contains(".");
+        boolean needsWorkaround = appFsName.contains(".");
         if( !needsWorkaround ){
             return;
         }
         // rename .cfg-file (makes it able to create running applications again, even within installer)
-        String newConfigFileName = appName.substring(0, appName.lastIndexOf("."));
-        Path appPath = nativeOutputDir.toPath().resolve(appName).resolve("app");
-        Path oldConfigFile = appPath.resolve(appName + CONFIG_FILE_EXTENSION);
+        String newConfigFileName = appFsName.substring(0, appFsName.lastIndexOf("."));
+        Path appPath = nativeOutputDir.toPath().resolve(appFsName).resolve("app");
+        Path oldConfigFile = appPath.resolve(appFsName + CONFIG_FILE_EXTENSION);
         try{
             Files.move(oldConfigFile, appPath.resolve(newConfigFileName + CONFIG_FILE_EXTENSION), StandardCopyOption.ATOMIC_MOVE);
         } catch(IOException ex){
@@ -204,9 +204,9 @@ public class Workarounds {
         });
     }
 
-    public void applyWorkaround124(String appName, List<NativeLauncher> secondaryLaunchers) {
+    public void applyWorkaround124(String appFsName, List<NativeLauncher> secondaryLaunchers) {
         // apply on main launcher
-        applyNativeLauncherWorkaround(appName);
+        applyNativeLauncherWorkaround(appFsName);
 
         // check on secondary launchers too
         if( secondaryLaunchers != null && !secondaryLaunchers.isEmpty() ){
@@ -246,19 +246,19 @@ public class Workarounds {
      * Get generated, fixed cfg-files and push them to app-resources-list.
      *
      *
-     * @param appName
+     * @param appFsName
      * @param secondaryLaunchers
      * @param params
      */
-    public void applyWorkaround205(String appName, List<NativeLauncher> secondaryLaunchers, Map<String, Object> params) {
+    public void applyWorkaround205(String appFsName, List<NativeLauncher> secondaryLaunchers, Map<String, Object> params) {
         // to workaround, we are gathering the fixed versions of the previous executed "app-bundler"
         // and assume they all are existing
         Set<File> filenameFixedConfigFiles = new HashSet<>();
 
         // get cfg-file of main native launcher
-        Path appPath = nativeOutputDir.toPath().resolve(appName).resolve("app").toAbsolutePath();
-        if( appName.contains(".") ){
-            String newConfigFileName = appName.substring(0, appName.lastIndexOf("."));
+        Path appPath = nativeOutputDir.toPath().resolve(appFsName).resolve("app").toAbsolutePath();
+        if (appFsName.contains(".")) {
+            String newConfigFileName = appFsName.substring(0, appFsName.lastIndexOf("."));
             File mainAppNameCfgFile = appPath.resolve(newConfigFileName + CONFIG_FILE_EXTENSION).toFile();
             if( mainAppNameCfgFile.exists() ){
                 getLog().info("Found main native application configuration file (" + mainAppNameCfgFile.toString() + ").");

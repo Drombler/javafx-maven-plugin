@@ -57,7 +57,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * Used as the 'id' of the application, and is used as the CFBundleDisplayName on Mac. See the official JavaFX
      * Packaging tools documentation for other information on this. Will be used as GUID on some installers too.
      *
-     * @parameter
+     * @parameter property="jfx.identifier"
      */
     protected String identifier;
 
@@ -66,7 +66,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * recommended just to set it from the get-go to avoid problems. This will default to the project.organization.name
      * element in you POM if you have one.
      *
-     * @parameter property="project.organization.name"
+     * @parameter property="jfx.vendor" default-value="${project.organization.name}"
      * @required
      */
     protected String vendor;
@@ -79,7 +79,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * <p>
      * This defaults to 'target/jfx/native' and the interesting files are usually under 'bundles'.
      *
-     * @parameter default-value="${project.build.directory}/jfx/native"
+     * @parameter property="jfx.nativeOutputDir" default-value="${project.build.directory}/jfx/native"
      */
     protected File nativeOutputDir;
 
@@ -157,7 +157,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * Normally all non-number signs and dots are removed from the value, which can be disabled
      * by setting 'skipNativeVersionNumberSanitizing' to true.
      *
-     * @parameter
+     * @parameter property="jfx.nativeReleaseVersion" default-value="1.0"
      */
     private String nativeReleaseVersion;
 
@@ -197,9 +197,18 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * filename of icon-files, e.g. having 'NiceApp' as appName means you have to place that icon
      * at 'src/main/deploy/package/[os]/NiceApp.[icon-extension]' for having it picked up by the bundler.
      *
-     * @parameter default-value="${project.build.finalName}"
+     * @parameter property="jfx.appName" default-value="${project.build.finalName}"
      */
     protected String appName;
+
+    /**
+     * The name of the JavaFX packaged executable to be built into the 'native/bundles' directory. By default this will be the finalName as set in your project. Change this if you want something
+     * nicer. This also has effect on the filename of icon-files, e.g. having 'NiceApp' as appName means you have to place that icon at 'src/main/deploy/package/[os]/NiceApp.[icon-extension]' for
+     * having it picked up by the bundler.
+     *
+     * @parameter property="jfx.appFsName" default-value="${project.build.finalName}"
+     */
+    protected String appFsName;
 
     /**
      * Will be set when having goal "build-native" within package-phase and calling "jfx:native" from CLI. Internal usage only.
@@ -388,7 +397,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
     protected boolean skipMacBundlerWorkaround = false;
 
     /**
-     * @parameter default-value=false
+     * @parameter property="jfx.failOnError" default-value=false
      */
     protected boolean failOnError = false;
 
@@ -457,6 +466,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
             });
 
             params.put(StandardBundlerParam.APP_NAME.getID(), appName);
+            params.put(StandardBundlerParam.APP_FS_NAME.getID(), appFsName);
             params.put(StandardBundlerParam.VERSION.getID(), nativeReleaseVersion);
             // replace that value
             if( !skipNativeVersionNumberSanitizing && nativeReleaseVersion != null ){
@@ -530,7 +540,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
 
             // check for secondary launcher misconfiguration (their appName requires to be different as this would overwrite primary launcher)
             Collection<String> launcherNames = new ArrayList<>();
-            launcherNames.add(appName);
+            launcherNames.add(appFsName);
             final AtomicBoolean nullLauncherNameFound = new AtomicBoolean(false);
             // check "no launcher names" and gather all names
             Optional.ofNullable(secondaryLaunchers).filter(list -> !list.isEmpty()).ifPresent(launchers -> {
@@ -693,7 +703,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
                     }
                 } catch(UnsupportedPlatformException e){
                     // quietly ignored
-                } catch(ConfigException e){
+                } catch (ConfigException e) {
                     if( failOnError ){
                         throw new MojoExecutionException("Skipping '" + b.getName() + "' because of configuration error '" + e.getMessage() + "'\nAdvice to fix: " + e.getAdvice());
                     } else {
@@ -724,11 +734,11 @@ public class NativeMojo extends AbstractJfxToolsMojo {
             if( "linux.app".equals(currentRunningBundlerID) ){
                 getLog().info("Applying workaround for oracle-jdk-bug since 1.8.0u40 regarding native linux launcher(s).");
                 if( !skipNativeLauncherWorkaround124 ){
-                    workarounds.applyWorkaround124(appName, secondaryLaunchers);
+                    workarounds.applyWorkaround124(appFsName, secondaryLaunchers);
                     // only apply workaround for issue 205 when having workaround for issue 124 active
                     if( Boolean.parseBoolean(String.valueOf(params.get(CFG_WORKAROUND_MARKER))) && !Boolean.parseBoolean((String) params.get(CFG_WORKAROUND_DONE_MARKER)) ){
                         getLog().info("Preparing workaround for oracle-jdk-bug since 1.8.0u40 regarding native linux launcher(s) inside native linux installers.");
-                        workarounds.applyWorkaround205(appName, secondaryLaunchers, params);
+                        workarounds.applyWorkaround205(appFsName, secondaryLaunchers, params);
                         params.put(CFG_WORKAROUND_DONE_MARKER, "true");
                     }
                 } else {
