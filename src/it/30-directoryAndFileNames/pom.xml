@@ -3,25 +3,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.zenjava</groupId>
-    <artifactId>javafx-maven-plugin-test-06-lifecycle-build-jfx-jar-properties</artifactId>
+    <artifactId>javafx-maven-plugin-test-30-directoryAndFileNames</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
-
-    <developers>
-        <developer>
-            <name>Danny Althoff</name>
-            <email>fibrefox@dynamicfiles.de</email>
-            <url>https://www.dynamicfiles.de</url>
-        </developer>
-    </developers>
+    
+    <contributors>
+        <contributor>
+            <name>Florian Brunner</name>
+            <properties>
+                <github>puce77</github>
+            </properties>
+        </contributor>
+    </contributors>
 
     <organization>
         <name>ZenJava</name>
     </organization>
-    
-    <properties>
-        <jfx.mainClass>com.zenjava.test.Main</jfx.mainClass>
-    </properties>
 
     <build>
         <plugins>
@@ -38,6 +35,13 @@
                 <groupId>com.zenjava</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>@project.version@</version>
+                <configuration>
+                    <mainClass>com.zenjava.test.Main</mainClass>
+                    <jfxMainAppJarName>foo.jar</jfxMainAppJarName>
+                    <jfxAppOutputDir>${project.build.directory}/bar</jfxAppOutputDir>
+                    <jfxBinDir>bin</jfxBinDir>
+                    <jfxLibDir>libraries</jfxLibDir>
+                </configuration>
                 <executions>
                     <execution>
                         <id>create-jfxjar</id>
@@ -50,4 +54,11 @@
             </plugin>
         </plugins>
     </build>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.5</version>
+        </dependency>
+    </dependencies>
 </project>
