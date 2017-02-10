@@ -495,18 +495,6 @@ public class NativeMojo extends AbstractJfxToolsMojo {
                 params.put(StandardBundlerParam.ARGUMENTS.getID(), new ArrayList<>(arguments));
             });
 
-            // bugfix for #83 (by copying additional resources to /target/jfx/app folder)
-            // https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/83
-            Optional.ofNullable(additionalAppResources).filter(File::exists).ifPresent(appResources -> {
-                try{
-                    Path targetFolder = jfxAppOutputDir.toPath();
-                    Path sourceFolder = appResources.toPath();
-                    copyRecursive(sourceFolder, targetFolder);
-                } catch(IOException e){
-                    getLog().warn(e);
-                }
-            });
-
             // gather all files for our application bundle
             Set<File> resourceFiles = new HashSet<>();
             try{
