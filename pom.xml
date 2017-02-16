@@ -329,7 +329,18 @@
             <scope>system</scope>
             <systemPath>${java.home}/../lib/ant-javafx.jar</systemPath>
         </dependency>
-
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-archiver</artifactId>
+            <version>3.4</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-archiver</artifactId>
+            <version>3.1.1</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <profiles>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component-set xmlns="http://plexus.codehaus.org/xsd/components"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xsi:schemaLocation="http://plexus.codehaus.org/xsd/components http://plexus.codehaus.org/xsd/components-1.3.0.xsd">
+    <components>
+        <!-- app-zip -->
+        <component>
+            <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+            <role-hint>zip</role-hint>
+            <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>
+            <configuration>
+                <classifier>app-zip</classifier>
+                <extension>zip</extension>
+                <type>app-zip</type>
+                <packaging>zip</packaging>
+                <language>java</language>
+                <addedToClasspath>false</addedToClasspath>
+            </configuration>
+        </component>
+        
+        <!-- deploy-zip -->
+        <component>
+            <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+            <role-hint>zip</role-hint>
+            <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>
+            <configuration>
+                <classifier>deploy-zip</classifier>
+                <extension>zip</extension>
+                <type>deploy-zip</type>
+                <packaging>zip</packaging>
+                <language>java</language>
+                <addedToClasspath>false</addedToClasspath>
+            </configuration>
+        </component>
+    </components>
+</component-set>
