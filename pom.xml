@@ -341,6 +341,18 @@
             <version>3.1.1</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.ops4j</groupId>
+            <artifactId>maven-pax-plugin</artifactId>
+            <version>1.6.0</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>2.10</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <profiles>
